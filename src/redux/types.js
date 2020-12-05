@@ -1,0 +1,8 @@
+export const GETTODOS = 'GETTODOS'
+export const LOGIN = 'LOGIN'
+export const LOGOUT = 'LOGOUT'
+export const LOADINGSTART = 'LOADINGSTART'
+export const LOADINGEND = 'LOADINGEND'
+export const ADDERRORMESSAGE = 'ADDERRORMESSAGE'
+export const ADDTODOCOUNT = 'ADDTODOCOUNT'
+export const PROCESS = 'PROCESS'
