@@ -5,13 +5,12 @@ import {
     LOGOUT,
     LOADINGSTART,
     LOADINGEND,
-    ADDERRORMESSAGE,
     PROCESS
 } from './types'
 
 const handlers = {
     [GETTODOS]: (state, action) => {
-        return {...state, todos: [...action.payload.todos]}
+        return {...state, todos: [...action.payload]}
     },
     [ADDTODOCOUNT]: (state, action) => {
         return {...state, todosCount: action.payload}
@@ -28,9 +27,6 @@ const handlers = {
     [LOADINGEND]: state => {
         return {...state, loading: false}
     },
-    [ADDERRORMESSAGE]: (state, action) => {
-        return {...state, errorMessage: action.payload}
-    },
     [PROCESS]: (state, action) => {
         return {...state, process: action.payload}
     },
@@ -41,13 +37,13 @@ const handlers = {
 const initialState = {
     todos: [],
     todosCount: 0,
-    admin: false,
+    admin: localStorage.getItem('token'),
     loading: false,
     process: {
         status: false,
-        text: undefined
-    },
-    errorMessage: undefined
+        text: undefined,
+        page: undefined
+    }
 }
 
 

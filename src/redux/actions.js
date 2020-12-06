@@ -6,7 +6,6 @@ import {
     LOGIN,
     LOADINGSTART,
     LOADINGEND,
-    ADDERRORMESSAGE,
     PROCESS
 } from './types'
 
@@ -19,6 +18,7 @@ export const logout = () => {
     localStorage.removeItem('token')
     return dispatch => {
         dispatch({type: LOGOUT})
+        dispatch(addProcess({status: false, text: ''}))
     }
 }
 
@@ -35,11 +35,7 @@ const addTodosCount = todosCount => {
     }
 }
 
-const addErrorMessage = errorMessage => {
-    return dispatch => {
-        dispatch({type: ADDERRORMESSAGE, payload: errorMessage})
-    }
-}
+
 const addProcess = process => {
     return dispatch => {
         dispatch({type: PROCESS, payload: process})
@@ -58,12 +54,12 @@ export const getTodos = ({sort_field, sort_direction, page}) => {
                 dispatch(addTodos(data.message.tasks))
                 dispatch(addTodosCount(data.message.total_task_count))
             }else {
-                dispatch(addErrorMessage(data.message))
+                dispatch(addProcess({status: false, text: data.message, page: 'create'}))
             }
             dispatch(loadingEnd())
         }catch (e) {
             dispatch(addTodos([]))
-            dispatch(addErrorMessage(e.message || 'something wrong.Try again later'))
+            dispatch(addProcess({status: false, text: e.message || 'something wrong.Try again later', page: 'create'}))
             dispatch(loadingEnd())
         }
     }
@@ -87,17 +83,13 @@ export const createTodo = ({username, email, text}) => {
             })
             const data = await response.json()
             if (data.status === 'ok'){
-                const response = await fetch(`${BASEURL}/?developer=${DEVELOPERNAME}`)
-                let data = await response.json()
-                dispatch(addTodos(data.message.tasks))
-                dispatch(addTodosCount(data.message.total_task_count))
-                dispatch(addProcess({status: true, text: 'Вы успешно добавили новую задачу'}))
+                dispatch(addProcess({status: true, text: 'Вы успешно добавили новую задачу', page: 'create'}))
             }else {
-                dispatch(addErrorMessage(data.message))
+                dispatch(addProcess({status: false, text: data.message, page: 'create'}))
             }
             dispatch(loadingEnd())
         }catch (e) {
-            dispatch(addErrorMessage(e.message || 'something wrong.Try again later'))
+            dispatch(addProcess({status: false, text: e.message || 'something wrong.Try again later', page: 'create'}))
             dispatch(loadingEnd())
         }
     }
@@ -110,8 +102,12 @@ export const editTodo = ({token, id, text, status}) => {
             const form = new FormData()
             form.append('token', token)
             text && form.append('text', text)
-            status && form.append('text', status)
+            status && form.append('status', status)
 
+            console.log(form)
+            console.log(token)
+            console.log(text)
+            console.log(status)
             const response = await fetch(`${BASEURL}/edit/${id}?developer=${DEVELOPERNAME}`,
                 {
                     crossDomain: true,
@@ -122,18 +118,18 @@ export const editTodo = ({token, id, text, status}) => {
                     body: form
                 })
             const data = await response.json()
-
+            console.log(data)
             if (data.status === 'ok'){
                 const response = await fetch(`${BASEURL}/?developer=${DEVELOPERNAME}`)
                 let data = await response.json()
                 dispatch(addTodos(data.message.tasks))
-                dispatch(addProcess({status: true, text: 'Вы успешно изменили задачу'}))
+                dispatch(addProcess({status: true, text: 'Вы успешно изменили задачу', page: 'main'}))
             }else {
-                dispatch(addErrorMessage(data.message))
+                dispatch(addProcess({status: false, text: data.message, page: 'main'}))
             }
             dispatch(loadingEnd())
         }catch (e) {
-            dispatch(addErrorMessage(e.message || 'something wrong.Try again later'))
+            dispatch(addProcess({status: false, text: e.message || 'something wrong.Try again later', page: 'main'}))
             dispatch(loadingEnd())
         }
     }
@@ -157,15 +153,16 @@ export const login = ({username , password}) => {
             })
             const data = await response.json()
             if (data.status === 'ok'){
+                console.log(data)
                 localStorage.setItem('token', data.message.token)
                 dispatch(loginAction())
-                dispatch(addProcess({status: true, text: 'Вы успешно залогинились преветствуем дорогой ' + username}))
+                dispatch(addProcess({status: true, text: 'Вы успешно залогинились преветствуем дорогой ' + username, page: 'login'}))
             }else {
-                dispatch(addErrorMessage(data.message))
+                dispatch(addProcess({status: false, text: data.message.password, page: 'login'}))
             }
             dispatch(loadingEnd())
         }catch (e) {
-            dispatch(addErrorMessage(e.message || 'something wrong.Try again later'))
+            dispatch(addProcess({status: false, text: e.message || 'something wrong.Try again later', page: 'login'}))
             dispatch(loadingEnd())
         }
     }
